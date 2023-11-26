@@ -1,10 +1,15 @@
-import { useSelector } from 'react-redux';
-import { initialFilter, getContacts } from '../ContactsSelectors';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { getAllContacts } from '../../apiContact';
+import { selectAllContacts, selectFilter } from '../ContactsSelectors';
 import ContactToSelect  from '../ContactToSelect/ContactToSelect';
 import css from './ContactList.module.css';
 
 const getContactsToSee = (contacts, normalizeFilter) =>{
-  return contacts.filter(({name}) =>{
+  if(!contacts){
+    return[];
+  }
+  return contacts.filter(({name}) => {
     if(typeof name === 'string'){
       return name.toLowerCase().includes(normalizeFilter);
     }
@@ -12,10 +17,16 @@ const getContactsToSee = (contacts, normalizeFilter) =>{
   });
 };
 const ContactList = () => {
-  const contacts = useSelector(getContacts);
-  const filter = useSelector(initialFilter);
+  const contacts = useSelector(selectAllContacts);
+  const filter = useSelector(selectFilter);
+  const dispatch = useDispatch();
+
   const normalizeFilter = filter ? filter.toLowerCase():'';
   const contactsToSee = getContactsToSee(contacts, normalizeFilter);
+
+  useEffect(()=>{
+    dispatch(getAllContacts());
+  }, [dispatch]);
 
   return (
     <ul className={css.contactList}>
@@ -31,4 +42,5 @@ const ContactList = () => {
     </ul>
   );
 };
+
 export default ContactList;
